@@ -9,9 +9,14 @@ import {
   formatSentence, getMatchingSuffix
 } from './sentence-builder.js';
 
-const openai = new OpenAI({
-  apiKey: process.env.OPENAI_API_KEY
-});
+function getOpenAIClient() {
+  if (!process.env.OPENAI_API_KEY) {
+    throw new Error('OPENAI_API_KEY environment variable is not set');
+  }
+  return new OpenAI({
+    apiKey: process.env.OPENAI_API_KEY
+  });
+}
 
 // Reverse lookups for translation
 const R_TRANSITIVE_VERBS = Object.fromEntries(
@@ -114,7 +119,7 @@ const EXAMPLE_SENTENCES = [
  * Semantic similarity using OpenAI embeddings
  */
 async function getEmbedding(text) {
-  const response = await openai.embeddings.create({
+  const response = await getOpenAIClient().embeddings.create({
     model: "text-embedding-3-small",
     input: text
   });
@@ -234,7 +239,7 @@ Inclusivity values: "inclusive", "exclusive"`
 
   messages.push({ role: 'user', content: sentence });
 
-  const response = await openai.chat.completions.create({
+  const response = await getOpenAIClient().chat.completions.create({
     model,
     messages,
     response_format: { type: "json_object" }
@@ -333,7 +338,7 @@ Leave words wrapped in square brackets (e.g. [SUBJECT]) as they are.`
     { role: 'user', content: JSON.stringify(sentences) }
   ];
 
-  const response = await openai.chat.completions.create({
+  const response = await getOpenAIClient().chat.completions.create({
     model,
     messages
   });
@@ -422,7 +427,7 @@ async function translateOvpToEnglish(params, model = 'gpt-3.5-turbo') {
 
   messages.push({ role: 'user', content: JSON.stringify(structure) });
 
-  const response = await openai.chat.completions.create({
+  const response = await getOpenAIClient().chat.completions.create({
     model,
     messages,
     temperature: 0.0
