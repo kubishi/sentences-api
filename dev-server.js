@@ -57,6 +57,10 @@ const server = http.createServer(async (req, res) => {
       res.writeHead(this.statusCode, { 'Content-Type': 'application/json', ...this.headers });
       res.end(JSON.stringify(data));
     },
+    send(data) {
+      res.writeHead(this.statusCode, this.headers);
+      res.end(data);
+    },
     end() {
       res.writeHead(this.statusCode, this.headers);
       res.end();
@@ -75,6 +79,10 @@ const server = http.createServer(async (req, res) => {
     handler = await loadHandler('builder/translate.js');
   } else if (pathname === '/translator/translate' || pathname === '/api/translator/translate') {
     handler = await loadHandler('translator/translate.js');
+  } else if (pathname === '/docs' || pathname === '/api/docs') {
+    handler = await loadHandler('docs.js');
+  } else if (pathname === '/openapi.json' || pathname === '/api/openapi.json') {
+    handler = await loadHandler('openapi.json.js');
   }
 
   if (handler) {
